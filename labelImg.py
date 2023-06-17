@@ -1460,6 +1460,8 @@ class MainWindow(QMainWindow, WindowMixin):
         if filename:
             self.load_file(filename)
 
+        self.create_shape()
+
     def open_file(self, _value=False):
         if not self.may_continue():
             return
