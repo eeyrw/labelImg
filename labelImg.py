@@ -8,11 +8,19 @@ import shutil
 import sys
 import webbrowser as wb
 from functools import partial
+from PIL.ImageQt import ImageQt
+from PIL import Image
+
+from pillow_heif import register_heif_opener
+register_heif_opener()
 
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
     from PyQt5.QtWidgets import *
+    from PyQt5 import QtWidgets, QtCore
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
 except ImportError:
     # needed for py3+qt4
     # Ref:
@@ -47,6 +55,7 @@ from libs.create_ml_io import CreateMLReader
 from libs.create_ml_io import JSON_EXT
 from libs.ustr import ustr
 from libs.hashableQListWidgetItem import HashableQListWidgetItem
+
 
 __appname__ = 'labelImg'
 
@@ -1281,7 +1290,8 @@ class MainWindow(QMainWindow, WindowMixin):
             self.load_file(filename)
 
     def scan_all_images(self, folder_path):
-        extensions = ['.%s' % fmt.data().decode("ascii").lower() for fmt in QImageReader.supportedImageFormats()]
+        exts = Image.registered_extensions()
+        extensions = exts.keys()
         images = []
 
         for root, dirs, files in os.walk(folder_path):
@@ -1675,9 +1685,9 @@ def inverted(color):
 
 def read(filename, default=None):
     try:
-        reader = QImageReader(filename)
-        reader.setAutoTransform(True)
-        return reader.read()
+        im = Image.open(filename)
+        qim = ImageQt(im)
+        return qim
     except:
         return default
 
